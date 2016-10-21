@@ -16,7 +16,7 @@ public class test {
     
         System.out.println("a");
         g.breathFirstSearch(g.getVertex(0));
-      //  g.breathFirstSearch(new Vertex(1));
+        g.breathFirstSearch(new Vertex(1));
         
     }
     
