@@ -86,10 +86,14 @@ public class Graph {
     }
 
     public void breathFirstSearch(Vertex startPoint) {
+        
+        //datastructure to process nodes in a FIFO fashion
         Queue<Vertex> q = new LinkedList();
+        //tree structure to store our BFS 
         DefaultMutableTreeNode tree = null;
 
         //setup list for marking of visted vertices
+        //set all to false (not visted)
         boolean[] vistedVertex = new boolean[numOfVertices];
         for (int i = 0; i < numOfVertices; i++) {
             vistedVertex[i] = false;
@@ -98,30 +102,41 @@ public class Graph {
         //set up tree to store result for BFS
         q.add(startPoint);
         vistedVertex[startPoint.getName()] = true;
-        
+
         while (!q.isEmpty()) {
 
             //get a vertex from the queue
             Vertex current = q.remove();
+            //special case for root (first node)
             if (tree == null) {
                 tree = new DefaultMutableTreeNode(startPoint);
-            }else{
+            } else {
+                //move onto the next node in pre-order
+                //(same level if exist, otherwise first child)
                 tree = tree.getNextNode();
             }
-            
+
             for (Edge eachEdge : current.getNeighborhood()) {
                 //visit a neighbouring vertex
                 Vertex adjacentVertex = eachEdge.getOtherVertex(current);
+
+                //make sure its not a vertex that is marked
                 if (!vistedVertex[adjacentVertex.getName()]) {
-                    vistedVertex[adjacentVertex.getName()] = true;  //mark it as visted
-                    q.add(adjacentVertex);//add it to the queue
+                    //mark it as visted
+                    vistedVertex[adjacentVertex.getName()] = true;
+                    
+                    //add it to the queue
+                    q.add(adjacentVertex);
+
+                    //make a tree node and add it into our tree
                     DefaultMutableTreeNode child = new DefaultMutableTreeNode(adjacentVertex);
                     tree.add(child);
                 }
             }
         }
 
-        for (Enumeration<DefaultMutableTreeNode> e = ((DefaultMutableTreeNode)tree.getRoot()).preorderEnumeration(); e.hasMoreElements();) {
+        //display our tree
+        for (Enumeration<DefaultMutableTreeNode> e = ((DefaultMutableTreeNode) tree.getRoot()).preorderEnumeration(); e.hasMoreElements();) {
             DefaultMutableTreeNode treenode = e.nextElement();
             Vertex a = (Vertex) treenode.getUserObject();
             System.out.println(a.getName() + " " + treenode.getLevel());
