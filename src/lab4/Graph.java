@@ -86,7 +86,7 @@ public class Graph {
     }
 
     public void breathFirstSearch(Vertex startPoint) {
-        
+
         //datastructure to process nodes in a FIFO fashion
         Queue<Vertex> q = new LinkedList();
         //tree structure to store our BFS 
@@ -111,9 +111,15 @@ public class Graph {
             if (tree == null) {
                 tree = new DefaultMutableTreeNode(startPoint);
             } else {
-                //move onto the next node in pre-order
-                //(same level if exist, otherwise first child)
-                tree = tree.getNextNode();
+                //do level by level travesal for node so that we can match our vertex queue
+                Enumeration<DefaultMutableTreeNode> e = ((DefaultMutableTreeNode)tree.getRoot()).breadthFirstEnumeration();
+                while (e.hasMoreElements()) {
+                    DefaultMutableTreeNode curr = e.nextElement();
+                    if(curr.equals(tree)){
+                        break;
+                    }
+                }
+                tree = e.nextElement();
             }
 
             for (Edge eachEdge : current.getNeighborhood()) {
@@ -124,7 +130,7 @@ public class Graph {
                 if (!vistedVertex[adjacentVertex.getName()]) {
                     //mark it as visted
                     vistedVertex[adjacentVertex.getName()] = true;
-                    
+
                     //add it to the queue
                     q.add(adjacentVertex);
 
@@ -135,13 +141,67 @@ public class Graph {
             }
         }
 
-        //display our tree
-        for (Enumeration<DefaultMutableTreeNode> e = ((DefaultMutableTreeNode) tree.getRoot()).preorderEnumeration(); e.hasMoreElements();) {
-            DefaultMutableTreeNode treenode = e.nextElement();
-            Vertex a = (Vertex) treenode.getUserObject();
-            System.out.println(a.getName() + " " + treenode.getLevel());
-        }
+        //store results of BFS tree into 3D array
+        storeBFSTree((DefaultMutableTreeNode) tree.getRoot());
 
+    }
+
+    public void storeBFSTree(DefaultMutableTreeNode BFSRoot) {
+        ArrayList<Vertex> path = new ArrayList();
+        int previousLevel = 0;
+        Vertex startPoint = (Vertex) BFSRoot.getUserObject();
+        //map BFS tree into 3D array
+        for (Enumeration<DefaultMutableTreeNode> e = BFSRoot.preorderEnumeration(); e.hasMoreElements();) {
+
+            //retrieve both the treenode and its vertex object
+            DefaultMutableTreeNode currTreeNode = e.nextElement();
+            Vertex currVertex = (Vertex) currTreeNode.getUserObject();
+
+            //special case for root
+            if (currTreeNode.getLevel() == 0) {
+                path.add(currVertex);
+                previousLevel = currTreeNode.getLevel();
+
+            } //siblings (same level on the BFS tree) remove previous node from path and add 
+            else if (currTreeNode.getLevel() == previousLevel) {
+                path.remove(path.size() - 1);
+                path.add(currVertex);
+
+            } //previous node is parent of curr node add curr node to the path
+            else if (currTreeNode.getLevel() > previousLevel) {
+                path.add(currVertex);
+                previousLevel = currTreeNode.getLevel();
+            } //traversing from leaf to another subtree remove the difference in level from path
+            else if (currTreeNode.getLevel() < previousLevel) {
+                for (int i = 0; i <= (previousLevel - currTreeNode.getLevel()); i++) {
+                    path.remove(path.size() - 1);
+                }
+                path.add(currVertex);
+                previousLevel = currTreeNode.getLevel();
+            }
+
+            //store it into an 3D array
+            pathResults[startPoint.getName()][currVertex.getName()] = new ArrayList(path.subList(0, path.size()));
+
+            for (Vertex v : path) {
+                System.out.print(v.getName() + " -> ");
+            }
+            System.out.println("");
+        }
+    }
+
+    public void printPath(Vertex start, Vertex end) {
+
+        for (Vertex v : pathResults[start.getName()][end.getName()]) {
+            System.out.print(v.getName() + " -> ");
+        }
+    }
+
+    public void printPath(int startID, int endID) {
+        Vertex start = getVertex(startID);
+        Vertex end = getVertex(endID);
+
+        printPath(start, end);
     }
 
     public Vertex getVertex(int ID) {

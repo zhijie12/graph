@@ -12,12 +12,13 @@ package lab4;
 public class test {
     
     public static void main(String[] args) {
-        Graph g = new Graph(10,10);
+        Graph g = new Graph(20,40);
     
-        System.out.println("a");
+        System.out.println("Graph generated");
         g.breathFirstSearch(g.getVertex(0));
-        g.breathFirstSearch(new Vertex(1));
         
+        System.out.println("From 0 to 5: ");
+        g.printPath(0, 5);
     }
     
 }
